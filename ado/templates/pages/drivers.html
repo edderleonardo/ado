@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% block content %}
+<div id="app">
+  <div class="mt-8 md:mt-10 flex justify-between items-center">
+    <h1 class="text-4xl">Conductores</h1>
+    <a class="cursor-pointer block md:hidden" v-on:click="showModal('add', '')"><i class="fas fa-plus-square"></i></a>
+    <button class="cursor-pointer hidden md:block button" v-on:click="showModal('add', '')">Agregar</button>
+  </div>
+  <div class="generic-table">
+    <table v-if="allData.length">
+      <thead>
+        <tr>
+          <th>Id</th>
+          <th>Nombre</th>
+          <th>Accion</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="obj in allData">
+          <td>${obj.pk}</td>
+          <td>${obj.name}</td>
+          <td class="text-center">
+            <span class="cursor-pointer" v-on:click="showModal('edit', obj.pk, obj.name)">Editar</span>
+            <span class="cursor-pointer" v-on:click="deleteData(obj.pk)">Eliminar</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <span v-else>Aún no tenemos datos para mostrar 😞</span>
+  </div>
+
+  <div v-bind:class="[displayModal ? 'showModal' : 'hideModal']" class="overlay">
+    <div class="modal">
+      <div class="modal__title">
+        <span class="cursor-pointer" v-on:click="hideModal()">X</span>
+      </div>
+      <div class="modal__body">
+        <h2 class="text-xl">${modalTitle}</h2>
+        <input type="text" name="driver-name" id="driver-name" v-model="newDataInput" placeholder="Nombre del conductor">
+        <span v-show="error" class="text-sm ml-1 mt-1 text-yellow-800">Este campo es requerido.</span>
+        <div class="text-right mt-4">
+          <button v-show="buttonAdd" v-on:click="addData">Agregar</button>
+          <button v-show="buttonEdit" v-on:click="editData">Editar</button>
+          <span>-</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+{% endblock %}
+
+{% block inline_javascript %}
+<script>
+  var app = new Vue({
+    el: "#app",
+    delimiters: ['${', '}'],
+    data: {
+      allData: [],
+      displayModal: false,
+      newDataInput: '',
+      objPk: '',
+      modalTitle: "Agregar Conductor",
+      buttonEdit: false,
+      buttonAdd: true,
+      error: false
+    },
+    methods: {
+      getModuleData: async function (url) {
+        try {
+          return await axios.get(url);
+        } catch (e) {
+          console.log(e)
+        }
+      },
+      helperSendModuleInfo: function (method, url, payload) {
+        // + This function is to make all the POST or PUT requests
+        const config = {
+          method: method,
+          url: url,
+          headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+          },
+          data: payload,
+          validateStatus: function (status) {
+            return status >= 200 && status <= 201 || status === 204;
+          },
+        }
+        return axios(config);
+      },
+      getAllData: async function () {
+        let url = "/api/v1/drivers/";
+        let response = await this.getModuleData(url);
+        this.allData = response.data.results;
+      },
+      showModal: function (mode, pk, name) {
+        this.newDataInput = '';
+        this.displayModal = true;
+        this.buttonAdd = true;
+        this.buttonEdit = false;
+        if (mode === 'edit') {
+          this.modalTitle = "Editar Conductor";
+          this.buttonAdd = false;
+          this.buttonEdit = true;
+          this.newDataInput = name;
+          this.objPk = pk;
+        }
+      },
+      hideModal: function () {
+        this.displayModal = false;
+        this.modalTitle = "Agregar Conductor"
+        this.newDataInput = '';
+        this.objPk = '';
+        this.error = false;
+      },
+      addData: function () {
+        let url = '/api/v1/drivers/';
+        payload = {
+          "name": this.newDataInput
+        }
+        let newData = this.helperSendModuleInfo('post', url, payload)
+
+        newData.then(value => {
+            this.getAllData();
+            this.displayModal = false;
+            this.newDataInput = ''
+            this.error = false;
+          })
+          .catch(error => {
+            console.log("Error", error);
+            this.error = 'name' in error.response.data
+          })
+      },
+      editData: function () {
+        this.displayModal = true;
+        payload = {
+          "name": this.newDataInput
+        }
+        let url = '/api/v1/drivers/' + this.objPk + '/';
+        let editData = this.helperSendModuleInfo('put', url, payload);
+        editData.then(res => {
+          this.getAllData();
+          this.displayModal = false;
+          this.newDataInput = '';
+          this.objPk = ''
+          this.modalTitle = "Agregar Conductor"
+        }).catch(error => {
+           this.error = 'name' in error.response.data
+        })
+      },
+      deleteData: function (pk) {
+        this.$swal({
+          title: "¿Está seguro de borrar el registro?",
+          text: "Una vez borrado no podrá recuperarse!",
+          icon: "warning",
+          buttons: true,
+          dangerMode: true
+        }).then((willDelete) => {
+          if (willDelete) {
+            let url = '/api/v1/drivers/' + pk + '/';
+            let deleteRegister = this.helperSendModuleInfo('delete', url)
+            deleteRegister.then(res => {
+              this.getAllData();
+              this.newDataInput = ''
+              swal("Registro borrado", {
+                icon: "success",
+              })
+            }).catch(error => {
+              console.log("Error", error)
+            });
+          }
+        })
+      }
+    },
+    created() {
+      this.getAllData();
+    }
+  });
+
+</script>
+{% endblock %}

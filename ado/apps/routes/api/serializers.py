@@ -12,6 +12,7 @@ class RouteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Route
         fields = [
+            'pk',
             'name',
             'num_buses',
             'avg_passengers',

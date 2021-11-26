@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+{% block content %}
+<div id="app">
+  <div class="mt-8 md:mt-10 flex justify-between items-center">
+    <h1 class="text-4xl">Trayectos</h1>
+    <a class="cursor-pointer block md:hidden" v-on:click="showModal('add', '')"><i class="fas fa-plus-square"></i></a>
+    <button class="cursor-pointer hidden md:block button" v-on:click="showModal('add', '')">Agregar</button>
+  </div>
+  <div class="generic-table">
+    <table v-if="allData.length">
+      <thead>
+        <tr>
+          <th>Id</th>
+          <th>Ruta</th>
+          <th>Horario</th>
+          <th>Número de autobuses</th>
+          <th>Accion</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="obj in allData">
+          <td>${obj.pk}</td>
+          <td>${obj.name}</td>
+          <td>${obj.schedule | formatDate }</td>
+          <td class="text-center">${obj.num_buses}</td>
+          <td class="text-center">
+            <span class="cursor-pointer" v-on:click="showModal('edit', obj.pk, obj.name, obj.schedule, obj.buses)">Editar</span>
+            <span class="cursor-pointer" v-on:click="deleteData(obj.pk)">Eliminar</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <span v-else>Aún no tenemos datos para mostrar 😞</span>
+  </div>
+
+  <div v-bind:class="[displayModal ? 'showModal' : 'hideModal']" class="overlay">
+    <div class="modal">
+      <div class="modal__title">
+        <span class="cursor-pointer" v-on:click="hideModal()">X</span>
+      </div>
+      <div class="modal__body">
+        <h2 class="text-xl">${modalTitle}</h2>
+        <input type="text" name="route-name" id="route-name" v-model="newDataInput" placeholder="Nombre de la Ruta">
+        <span v-show="error" class="text-sm ml-1 mt-1 text-yellow-800">Este campo es requerido.</span>
+        <input type="text" name="schedule" id="schedule" v-model="dateTime" placeholder="">
+        <span v-show="error" class="text-sm ml-1 mt-1 text-yellow-800">Este campo es requerido.</span>
+        <!-- <select name="buses" id="buses" >
+          <option v-for="bus in buses" v-bind:value="bus.pk">${bus.code}</option>
+        </select> -->
+        <multiselect
+              v-model.trim="busesData"
+              tag-placeholder="Add this as new tag"
+              placeholder=""
+              selectLabel=""
+              deselectLabel=""
+              selectedLabel="Seleccionado"
+              label="code"
+              track-by="pk"
+              :options="buses"
+              :multiple="true"
+              :taggable="true"
+              @tag="addTag"></multiselect>
+
+        <div class="text-right mt-4">
+          <button v-show="buttonAdd" v-on:click="addData">Agregar</button>
+          <button v-show="buttonEdit" v-on:click="editData">Editar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+{% endblock %}
+
+{% block inline_javascript %}
+<script>
+  Vue.filter('formatDate', function(value) {
+    if (value) {
+      return moment(String(value)).format('MM/DD/YYYY hh:mm')
+    }
+  })
+  var app = new Vue({
+    el: "#app",
+    delimiters: ['${', '}'],
+    components: { Multiselect: window.VueMultiselect.default },
+    data: {
+      allData: [],
+      displayModal: false,
+      newDataInput: '',
+      dateTime: '',
+      objPk: '',
+      busesData: '',
+      buses: [],
+      selectedIds: [],
+      modalTitle: "Agregar Trayecto",
+      buttonEdit: false,
+      buttonAdd: true,
+      error: false
+    },
+    watch: {
+      // this watcher puts the selected ids in the payload
+      busesData: function (newValues) {
+        this.selectedIds = newValues.map(obj => obj.pk);
+      }
+    },
+    methods: {
+      getModuleData: async function (url) {
+        try {
+          return await axios.get(url);
+        } catch (e) {
+          console.log(e)
+        }
+      },
+      helperSendModuleInfo: function (method, url, payload) {
+        // + This function is to make all the POST or PUT requests
+        const config = {
+          method: method,
+          url: url,
+          headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+          },
+          data: payload,
+          validateStatus: function (status) {
+            return status >= 200 && status <= 201 || status === 204;
+          },
+        }
+        return axios(config);
+      },
+      getAllData: async function () {
+        let url = "/api/v1/route/";
+        let response = await this.getModuleData(url);
+        this.allData = response.data.results;
+      },
+      getBuses: async function () {
+        let url = "/api/v1/buses/";
+        let response = await this.getModuleData(url);
+        this.buses = response.data.results;
+      },
+      showModal: function (mode, pk, name, schedule, buses) {
+        this.newDataInput = '';
+        this.displayModal = true;
+        if (mode === 'edit') {
+          this.modalTitle = "Editar Trayecto";
+          this.buttonAdd = false;
+          this.buttonEdit = true;
+          this.newDataInput = name;
+          this.objPk = pk;
+          this.dateTime = schedule
+          this.buses = busesData
+        }
+      },
+      hideModal: function () {
+        this.displayModal = false;
+        this.modalTitle = "Agregar Trayecto"
+        this.buttonAdd = true;
+        this.buttonEdit = false;
+        this.newDataInput = '';
+        this.objPk = '';
+        this.dateTime = schedule
+        this.buses = busesData
+        this.error = false;
+      },
+      addTag: function (newTag) {
+        const tag = {
+          code: newTag,
+          pk: newTag.substring(0, 2) + Math.floor((Math.random() * 10000000))
+        }
+        this.categories.push(tag)
+      },
+      addData: function () {
+        let url = '/api/v1/route/';
+        payload = {
+          "name": this.newDataInput,
+          "schedule": moment(this.dateTime).format('YYYY-MM-DD HH:MM:SS'),
+          "buses": this.selectedIds
+        }
+        let newData = this.helperSendModuleInfo('post', url, payload)
+
+        newData.then(value => {
+            this.getAllData();
+            this.displayModal = false;
+            this.newDataInput = ''
+            this.dateTime = ''
+            this.selectedIds = []
+            this.busesData = ''
+          })
+          .catch(error => {
+            console.log("Error", error);
+            this.error = 'name' in error.response.data
+          })
+      },
+      editData: function () {
+        this.displayModal = true;
+        payload = {
+          "name": this.newDataInput,
+          "schedule": moment(this.dateTime).format('YYYY-MM-DD HH:MM:SS'),
+          "buses": this.selectedIds
+        }
+        let url = '/api/v1/route/' + this.objPk + '/';
+        let editData = this.helperSendModuleInfo('put', url, payload);
+        editData.then(res => {
+          this.getAllData();
+          this.displayModal = false;
+          this.newDataInput = '';
+          this.objPk = ''
+          this.modalTitle = "Agregar Trayecto"
+        }).catch(error => {
+          console.log("Error", error)
+          this.error = 'name' in error.response.data
+        })
+      },
+      deleteData: function (pk) {
+        this.$swal({
+          title: "¿Está seguro de borrar el registro?",
+          text: "Una vez borrado no podrá recuperarse!",
+          icon: "warning",
+          buttons: true,
+          dangerMode: true
+        }).then((willDelete) => {
+          if (willDelete) {
+            let url = '/api/v1/route/' + pk + '/';
+            let deleteRegister = this.helperSendModuleInfo('delete', url)
+            deleteRegister.then(res => {
+              this.getAllData();
+              this.newDataInput = ''
+              swal("Registro borrado", {
+                icon: "success",
+              })
+            }).catch(error => {
+              console.log("Error", error)
+            });
+          }
+        })
+      }
+    },
+    created() {
+      this.getAllData();
+      this.getBuses();
+    }
+  });
+
+</script>
+{% endblock %}

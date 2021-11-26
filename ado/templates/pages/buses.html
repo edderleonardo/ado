@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+{% block content %}
+<div id="app">
+  <div class="mt-8 md:mt-10 flex justify-between items-center">
+    <h1 class="text-4xl">Buses</h1>
+    <a class="cursor-pointer block md:hidden" v-on:click="showModal('add', '')"><i class="fas fa-plus-square"></i></a>
+    <button class="cursor-pointer hidden md:block button" v-on:click="showModal('add', '')">Agregar</button>
+  </div>
+  <div class="generic-table">
+    <table v-if="allData.length">
+      <thead>
+        <tr>
+          <th>Id</th>
+          <th>Code</th>
+          <th>Descripción</th>
+          <th>Driver</th>
+          <th>Accion</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="obj in allData">
+          <td>${obj.pk}</td>
+          <td>${obj.code}</td>
+          <td>${obj.description}</td>
+          <td>${obj.driver.name}</td>
+          <td class="text-center">
+            <span class="cursor-pointer" v-on:click="showModal('edit', obj.pk, obj.code, obj.description, obj.driver.pk)">Editar</span>
+            <span class="cursor-pointer" v-on:click="deleteData(obj.pk)">Eliminar</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <span v-else>Aún no tenemos datos para mostrar 😞</span>
+  </div>
+
+  <div v-bind:class="[displayModal ? 'showModal' : 'hideModal']" class="overlay">
+    <div class="modal">
+      <div class="modal__title">
+        <span class="cursor-pointer" v-on:click="hideModal()">X</span>
+      </div>
+      <div class="modal__body">
+        <h2 class="text-xl">${modalTitle}</h2>
+        <input type="text" name="driver-name" id="driver-name" v-model="newDataInput" placeholder="Código" required>
+        <span v-show="errorCode" class="text-sm ml-1 mt-1 text-yellow-800">Este campo es requerido.</span>
+        <input type="text" name="description" id="description" v-model="newDataDescription" placeholder="Descripción" required>
+        <span v-show="errorDescription" class="text-sm ml-1 mt-1 text-yellow-800">Este campo es requerido.</span>
+        <select id="driver" name="driver" v-model="driver" required>
+          <option value="" disabled>Seleccione un conductor</option>
+          <option v-for="driver in drivers" v-bind:value="driver.pk">${driver.name}</option>
+        </select>
+        <span v-show="errorDriver" class="text-sm ml-1 mt-1 text-yellow-800">Este campo es requerido y no debe ser duplicado.</span>
+        <div class="text-right mt-4">
+          <button v-show="buttonAdd" v-on:click="addData">Agregar</button>
+          <button v-show="buttonEdit" v-on:click="editData">Editar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+{% endblock %}
+
+{% block inline_javascript %}
+<script>
+  var app = new Vue({
+    el: "#app",
+    delimiters: ['${', '}'],
+    data: {
+      allData: [],
+      displayModal: false,
+      newDataInput: '',
+      newDataDescription: '',
+      objPk: '',
+      driver: '',
+      drivers: [],
+      modalTitle: "Agregar Bus",
+      buttonEdit: false,
+      buttonAdd: true,
+      errorCode: false,
+      errorDescription: false,
+      errorDriver: false,
+      errorDuplicateDriver: false
+    },
+    methods: {
+      getModuleData: async function (url) {
+        try {
+          return await axios.get(url);
+        } catch (e) {
+          console.log(e)
+        }
+      },
+      helperSendModuleInfo: function (method, url, payload) {
+        // + This function is to make all the POST or PUT requests
+        const config = {
+          method: method,
+          url: url,
+          headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+          },
+          data: payload,
+          validateStatus: function (status) {
+            return status >= 200 && status <= 201 || status === 204;
+          },
+        }
+        return axios(config);
+      },
+      getAllData: async function () {
+        let url = "/api/v1/buses/";
+        let response = await this.getModuleData(url);
+        this.allData = response.data.results;
+      },
+      getDrivers: async function () {
+        let url = '/api/v1/drivers/';
+        let response = await this.getModuleData(url);
+        this.drivers = response.data.results;
+      },
+      showModal: function (mode, pk, code, description, driverPk) {
+        this.newDataInput = '';
+        this.displayModal = true;
+        if (mode === 'edit') {
+          this.modalTitle = "Editar Bus";
+          this.buttonAdd = false;
+          this.buttonEdit = true;
+          this.newDataInput = code;
+          this.newDataDescription = description
+          this.objPk = pk;
+          this.driver = driverPk
+        }
+      },
+      hideModal: function () {
+        this.displayModal = false;
+        this.modalTitle = "Agregar Bus"
+        this.buttonAdd = true;
+        this.buttonEdit = false;
+        this.newDataInput = '';
+        this.newDataDescription = '';
+        this.objPk = '';
+        this.errorCode = false;
+        this.errorDescription = false;
+        this.errorDriver = false;
+      },
+      addData: function () {
+        let url = '/api/v1/buses/';
+        payload = {
+          "code": this.newDataInput,
+          "description": this.newDataDescription,
+          "driver": this.driver
+        }
+
+        let newData = this.helperSendModuleInfo('post', url, payload)
+
+        newData.then(value => {
+            this.getAllData();
+            this.displayModal = false;
+            this.newDataInput = '';
+            this.newDataDescription = '';
+          })
+          .catch(error => {
+            this.errorCode = 'code' in error.response.data;
+            this.errorDescription = 'description' in error.response.data;
+            this.errorDriver = 'driver' in error.response.data;
+          })
+      },
+      editData: function () {
+        this.displayModal = true;
+        payload = {
+          "code": this.newDataInput,
+          "description": this.newDataDescription,
+          "driver": this.driver
+        }
+        let url = '/api/v1/buses/' + this.objPk + '/';
+        let editData = this.helperSendModuleInfo('put', url, payload);
+        editData.then(res => {
+          this.getAllData();
+          this.displayModal = false;
+          this.newDataInput = '';
+          this.newDataDescription = '';
+          this.objPk = ''
+          this.modalTitle = "Agregar Bus"
+        }).catch(error => {
+          this.errorDriver = 'driver' in error.response.data;
+        })
+      },
+      deleteData: function (pk) {
+        this.$swal({
+          title: "¿Está seguro de borrar el registro?",
+          text: "Una vez borrado no podrá recuperarse!",
+          icon: "warning",
+          buttons: true,
+          dangerMode: true
+        }).then((willDelete) => {
+          if (willDelete) {
+            let url = '/api/v1/buses/' + pk + '/';
+            let deleteRegister = this.helperSendModuleInfo('delete', url)
+            deleteRegister.then(res => {
+              this.getAllData();
+              this.newDataInput = '';
+              this.newDataDescription = '';
+              swal("Registro borrado", {
+                icon: "success",
+              })
+            }).catch(error => {
+              console.log("Error", error)
+            });
+          }
+        })
+      }
+    },
+    created() {
+      this.getAllData();
+      this.getDrivers()
+    }
+  });
+
+</script>
+{% endblock %}

@@ -1,37 +1,117 @@
+@import "breakpoints";
+@import "colors";
+@import "general";
 
+.menu {
+  background-color: $primary-color;
+  color: $complement-color;
+  justify-content: center;
+  align-content: center;
 
-
-
-// project specific CSS goes here
-
-////////////////////////////////
-		//Variables//
-////////////////////////////////
-
-// Alert colors
-
-$white: #fff;
-$mint-green: #d6e9c6;
-$black: #000;
-$pink: #f2dede;
-$dark-pink: #eed3d7;
-$red: #b94a48;
-
-////////////////////////////////
-		//Alerts//
-////////////////////////////////
-
-// bootstrap alert CSS, translated to the django-standard levels of
-// debug, info, success, warning, error
-
-.alert-debug {
-  background-color: $white;
-  border-color: $mint-green;
-  color: $black;
+  &__item {
+    margin-bottom: 20px;
+  }
 }
 
-.alert-error {
-  background-color: $pink;
-  border-color: $dark-pink;
-  color: $red;
+.generic-table {
+  margin-top: 15px;
+  max-height: 400px;
+  width: 100%;
+  overflow-y: auto;
+
+  table {
+    width: 800px;
+
+    thead {
+      position: sticky;
+      top: 0;
+      background-color: $primary-color;
+      color: $complement-color;
+      height: 37px;
+
+      tr {
+        th {
+          font-weight: 100;
+          font-size: 14px;
+          padding-left: 10px;
+        }
+      }
+    }
+
+    tbody {
+
+      tr {
+        border: 1px solid #e8e8e8;
+
+        td {
+          padding-left: 10px;
+
+          span {
+            display: block;
+            color: #454545;
+
+            &:nth-child(2) {
+              color: #797979 !important;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.button {
+  @include button-style;
+}
+
+.showModal {
+  visibility: visible;
+}
+
+.hideModal {
+  visibility: hidden;
+}
+
+.overlay {
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.modal {
+  border-radius: 5px;
+  background-color: $second-color;
+  //height: 215px;
+  width: 500px;
+  padding: 15px;
+
+  &__title {
+    text-align: end;
+  }
+
+  &__body {
+    display: grid;
+
+    input {
+      @include input-style;
+      margin-top: 15px;
+    }
+
+    select {
+      @include select-style;
+    }
+
+    button {
+      @include button-style;
+    }
+  }
 }

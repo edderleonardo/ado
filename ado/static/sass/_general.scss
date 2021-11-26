@@ -1,0 +1,47 @@
+@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500&display=swap");
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: "Quicksand", sans-serif;
+}
+
+@mixin button-style {
+  color: $second-color;
+  height: 48px;
+  border-radius: 5px;
+  background-color: $primary-color;
+  width: 130px;
+  padding: 8px;
+  font-weight: 500;
+}
+
+@mixin input-style {
+  background-color: #f8f8f8;
+  border: 2px solid #f8f8f8;
+  border-radius: 4px;
+  height: 48px;
+  text-indent: 16px;
+
+  &::placeholder {
+    color: #a8a8a8;
+  }
+  &:focus {
+    background-color: #f8f8f8;
+    border: 2px solid #f8f8f8;
+    //box-shadow: 0 0 0 0.2rem #c7ae92;
+    outline: 0 !important;
+    -webkit-appearance: none;
+    &::-webkit-input-placeholder {
+      color: #a8a8a8;
+    }
+  }
+}
+
+@mixin select-style {
+  background-color: #f8f8f8;
+  height: 48px !important;
+  text-indent: 5px;
+  margin-top: 15px;
+  border-radius: 5px
+}

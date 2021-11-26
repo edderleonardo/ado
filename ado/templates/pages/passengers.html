@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% block content %}
+<div id="app">
+  <div class="mt-8 md:mt-10 flex justify-between items-center">
+    <h1 class="text-4xl">Pasajeros</h1>
+    <a class="cursor-pointer block md:hidden" v-on:click="showModal('add', '')"><i class="fas fa-plus-square"></i></a>
+    <button class="cursor-pointer hidden md:block button" v-on:click="showModal('add', '')">Agregar</button>
+  </div>
+  <div class="generic-table">
+    <table v-if="passengers.length">
+      <thead>
+        <tr>
+          <th>Id</th>
+          <th>Nombre</th>
+          <th>Accion</th>
+        </tr>
+      </thead>
+      <tbody >
+        <tr v-for="passenger in passengers">
+            <td class="text-center">${passenger.pk}</td>
+            <td>${passenger.name}</td>
+            <td class="text-center">
+              <span class="cursor-pointer" v-on:click="showModal('edit', passenger.pk, passenger.name)">Editar</span>
+              <span class="cursor-pointer" v-on:click="deleteData(passenger.pk)">Eliminar</span>
+            </td>
+        </tr>
+      </tbody>
+    </table>
+    <span v-else>Aún no tenemos datos para mostrar 😞</span>
+  </div>
+
+  <div v-bind:class="[displayModal ? 'showModal' : 'hideModal']" class="overlay">
+    <div class="modal">
+      <div class="modal__title">
+        <span class="cursor-pointer" v-on:click="hideModal()">X</span>
+      </div>
+      <div class="modal__body">
+        <h2 class="text-xl">${modalTitle}</h2>
+        <input type="text" name="passenger-name" id="passenger-name" v-model="newPassengerInput" placeholder="Nombres del pasajero">
+        <span v-show="error" class="text-sm ml-1 mt-1 text-yellow-800">Este campo es requerido.</span>
+        <div class="text-right mt-4">
+          <button v-show="buttonAdd" v-on:click="addPassenger">Agregar</button>
+          <button v-show="buttonEdit" v-on:click="editData()">Editar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block inline_javascript %}
+<script>
+  var app = new Vue({
+    el: "#app",
+    delimiters: ['${', '}'],
+    data: {
+      passengers: [],
+      displayModal: false,
+      newPassengerInput: '',
+      passengerPk: '',
+      modalTitle: "Agregar Pasajero",
+      buttonEdit: false,
+      buttonAdd: true,
+      error: false
+    },
+    methods: {
+      getModuleData: async function (url) {
+        try {
+          return await axios.get(url);
+        } catch (e) {
+          console.log(e)
+        }
+      },
+      helperSendModuleInfo: function (method, url, payload) {
+        // + This function is to make all the POST or PUT requests
+        const config = {
+          method: method,
+          url: url,
+          headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+          },
+          data: payload,
+          validateStatus: function (status) {
+            return status >= 200 && status <= 201 || status === 204;
+          },
+        }
+        return axios(config);
+      },
+      getPassegers: async function () {
+        let url = "/api/v1/passenger/";
+        let response = await this.getModuleData(url);
+        this.passengers = response.data.results;
+      },
+      showModal: function (mode, pk, name) {
+        this.newPassengerInput = '';
+        this.displayModal = true;
+        this.buttonAdd = true;
+        this.buttonEdit = false;
+        if (mode === 'edit') {
+          this.modalTitle = "Editar Pasajero";
+          this.buttonAdd = false;
+          this.buttonEdit = true;
+          this.newPassengerInput = name;
+          this.passengerPk = pk;
+        }
+      },
+      hideModal: function () {
+        this.displayModal = false;
+        this.modalTitle = "Agregar Pasajero"
+        this.newPassengerInput = '';
+        this.passengerPk = '';
+        this.error = false;
+      },
+      addPassenger: function () {
+        let url = '/api/v1/passenger/';
+        payload = {
+          "name": this.newPassengerInput
+        }
+        let newData = this.helperSendModuleInfo('post', url, payload)
+
+        newData.then(value => {
+            this.getPassegers();
+            this.displayModal = false;
+            this.newPassengerInput = ''
+            this.error = false;
+          })
+          .catch(error => {
+            console.log("Error", error.response);
+            this.error = 'name' in error.response.data
+          })
+      },
+      editData: function () {
+        this.displayModal = true;
+        payload = {
+          "name": this.newPassengerInput
+        }
+        let url = '/api/v1/passenger/' + this.passengerPk + '/';
+        let editData = this.helperSendModuleInfo('put', url, payload);
+        editData.then(res => {
+          this.getPassegers();
+          this.displayModal = false;
+          this.newPassengerInput = '';
+          this.modalTitle = "Agregar Pasajero";
+          this.passengerPk = '';
+        }).catch(error => {
+          this.error = 'name' in error.response.data
+        })
+      },
+      deleteData: function (pk) {
+        this.$swal({
+          title: "¿Está seguro de borrar el registro?",
+          text: "Una vez borrado no podrá recuperarse!",
+          icon: "warning",
+          buttons: true,
+          dangerMode: true,
+        }).then((willDelete) => {
+          if (willDelete) {
+            let url = '/api/v1/passenger/' + pk + '/';
+            let deleteRegister = this.helperSendModuleInfo('delete', url)
+            deleteRegister.then(res => {
+              this.getPassegers();
+              this.newPassengerInput = ''
+              swal("Registro borrado", {
+                icon: "success",
+              })
+            }).catch(error => {
+              console.log("Error", error)
+            });
+          }
+        })
+      }
+    },
+    created() {
+      this.getPassegers();
+    }
+  });
+
+</script>
+{% endblock %}
