@@ -1,3 +1,5 @@
+import datetime
+
 from django.conf import settings
 from django.test.testcases import TestCase
 from django.urls import reverse
@@ -6,7 +8,14 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from ado.apps.buses.models import Bus, Seat
-from ado.utils.testing import create_and_login_user, create_driver
+from ado.apps.routes.models import Route
+from ado.utils.testing import (
+    create_and_login_user,
+    create_bus,
+    create_driver,
+    create_fake_data_buses_routes,
+    create_passenger,
+)
 
 fake = Faker()
 
@@ -116,3 +125,21 @@ class PrivateBusesTest(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         self.assertNotEqual(res.status_code, status.HTTP_200_OK)
+
+    def test_filter_buses(self):
+        """Filter buses by route and avg"""
+        create_fake_data_buses_routes()
+        route_one = Route.objects.get(name="Route 1")
+        route_two = Route.objects.get(name="Route 2")
+        # Route with data (40%)
+        res = self.client.get('/api/v1/buses/?route={0}&num_pass={1}'.format(route_one.pk, 40))
+        # Route without data
+        res_two = self.client.get('/api/v1/buses/?route={0}&num_pass={1}'.format(route_two.pk, 40))
+        # The route not exist
+        res_three = self.client.get('/api/v1/buses/?route=10')
+
+        self.assertEqual(res.data['count'], 1)
+        self.assertNotEqual(res.data['count'], 0)
+        self.assertEqual(res_two.data['count'], 0)
+        self.assertNotEqual(res_two.data['count'], 1)
+        self.assertEqual(res_three.status_code, status.HTTP_400_BAD_REQUEST)

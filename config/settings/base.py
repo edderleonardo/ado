@@ -303,3 +303,4 @@ CORS_URLS_REGEX = r"^/api/.*$"
 # Your stuff...
 # ------------------------------------------------------------------------------
 SEAT_BY_BUS = int(env("SEAT_BY_BUS"))
+LOGIN_REDIRECT_URL = "home:index"

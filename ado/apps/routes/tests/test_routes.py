@@ -1,14 +1,23 @@
 import datetime
 
-from django.utils import timezone
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 from faker import Faker
-from rest_framework import status
+from rest_framework import serializers, status
 from rest_framework.test import APIClient
 
+from ado.apps.buses.api.serializers import BusSerializer
+from ado.apps.buses.models import Bus, Seat
+from ado.apps.routes.api.serializers import RouteSerializer
 from ado.apps.routes.models import Route
-from ado.utils.testing import create_and_login_user, create_bus, create_driver
+from ado.utils.testing import (
+    create_and_login_user,
+    create_bus,
+    create_driver,
+    create_fake_data_buses_routes,
+    create_passenger,
+)
 
 fake = Faker()
 ROUTES_URL_CREATE_LIST = reverse('api:route-list')
@@ -112,3 +121,15 @@ class PrivateRouteTest(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         self.assertNotEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_avg_by_route(self):
+        """Test avg passengers by route"""
+        create_fake_data_buses_routes()
+
+        buses = Bus.objects.all()
+        serializer = BusSerializer(buses, many=True).data
+
+        self.assertEqual(serializer[0]['avg_passenger'], 40.0)
+        self.assertNotEqual(serializer[0]['avg_passenger'], 00.0)
+        self.assertEqual(serializer[1]['avg_passenger'], 00.0)
+        self.assertNotEqual(serializer[1]['avg_passenger'], 40.0)
