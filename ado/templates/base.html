@@ -1,84 +1,95 @@
-{% load static i18n %}<!DOCTYPE html>
+{% load static i18n %}
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>{% block title %}fastbus{% endblock title %}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Bus system">
-    <meta name="author" content="Edder Ramirez">
 
-    <link rel="icon" href="{% static 'images/favicons/favicon.ico' %}">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>{% block title %}fastbus{% endblock title %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Bus system">
+  <meta name="author" content="Edder Ramirez">
 
-    {% block css %}
-    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
-    <script src="https://unpkg.com/vue-multiselect@2.1.0"></script>
-    <link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
-    <!-- Your stuff: Third-party CSS libraries go here -->
-    <!-- This file stores project-specific CSS -->
-    <link href="{% static 'css/project.css' %}" rel="stylesheet">
-    {% endblock %}
-    <!-- Le javascript
+  <link rel="icon" href="{% static 'images/favicons/favicon.ico' %}">
+
+  {% block css %}
+  <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/vue-multiselect@2.1.0"></script>
+  <link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
+  <!-- Your stuff: Third-party CSS libraries go here -->
+  <!-- This file stores project-specific CSS -->
+  <link href="{% static 'css/project.css' %}" rel="stylesheet">
+  {% endblock %}
+  <!-- Le javascript
     ================================================== -->
-    {# Placed at the top of the document so pages load faster with defer #}
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous">
-    {% block javascript %}
-      <!-- place project specific Javascript in this file -->
+  {# Placed at the top of the document so pages load faster with defer #}
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css"
+    integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous">
+  {% block javascript %}
+  <!-- place project specific Javascript in this file -->
 
 
-    {% endblock javascript %}
+  {% endblock javascript %}
 
-  </head>
+</head>
 
-  <body>
-    <div class="container h-screen grid grid-cols-12">
-      <nav class="menu grid col-span-2 md:col-span-3 lg:col-span-2">
-        <div class="">
-          <a class="menu__title hidden md:block" href="">fastbus</a>
-            <ul class="">
-              <li class="menu__item">
-                <a class="" href="{% url 'home:index' %}"><i class="fas fa-home text-3xl"></i><span class="hidden md:inline-block">Inicio</span></a>
-              </li>
+<body>
+  <div class="container h-screen grid grid-cols-12">
+    <nav class="menu grid col-span-2 md:col-span-3 lg:col-span-2">
+      <div class="">
+        <a class="menu__title hidden md:block" href="">fastbus</a>
+        <ul class="">
+          <li class="menu__item">
+            <a class="" href="{% url 'home:index' %}"><i class="fas fa-home text-3xl"></i><span
+                class="hidden md:inline-block">Inicio</span></a>
+          </li>
 
-              <li class="menu__item">
-                <a class="" href="{% url 'home:passengers' %}"><i class="fas fa-users text-3xl"></i><span class="hidden md:inline-block">Pasajeros</span></a>
-              </li>
+          <li class="menu__item">
+            <a class="" href="{% url 'home:passengers' %}"><i class="fas fa-users text-3xl"></i><span
+                class="hidden md:inline-block">Pasajeros</span></a>
+          </li>
 
-              <li class="menu__item">
-                <a class="" href="{% url 'home:drivers' %}"><i class="fas fa-user text-3xl"></i><span class="hidden md:inline-block">Conductores</span></a>
-              </li>
+          <li class="menu__item">
+            <a class="" href="{% url 'home:drivers' %}"><i class="fas fa-user text-3xl"></i><span
+                class="hidden md:inline-block">Conductores</span></a>
+          </li>
 
-              <li class="menu__item">
-                <a class="" href="{% url 'home:buses' %}"><i class="fas fa-bus text-3xl"></i><span class="hidden md:inline-block">Buses</span></a>
-              </li>
+          <li class="menu__item">
+            <a class="" href="{% url 'home:buses' %}"><i class="fas fa-bus text-3xl"></i><span
+                class="hidden md:inline-block">Buses</span></a>
+          </li>
 
-              <li class="menu__item">
-                <a class="" href="{% url 'home:routes' %}"><i class="fas fa-route text-3xl"></i><span class="hidden md:inline-block">Trayectos</span></a>
-              </li>
-              <!--
-              <li class="menu__item">
-                <a class="" href="{% url 'home:sales' %}"><i class="fas fa-ticket-alt text-3xl"></i><span class="hidden md:inline-block">Venta</span></a>
-              </li>-->
+          <li class="menu__item">
+            <a class="" href="{% url 'home:routes' %}"><i class="fas fa-route text-3xl"></i><span
+                class="hidden md:inline-block">Trayectos</span></a>
+          </li>
 
-              <li class="menu__item">
-                {# URL provided by django-allauth/account/urls.py #}
-                <a class="nav-link" href="{% url 'account_logout' %}"><i class="fas fa-sign-out-alt text-3xl"></i> <span class="hidden md:inline-block">Salir</span></a>
-              </li>
-            </ul>
-        </div>
-      </nav>
-      <div class="col-start-4 md:col-start-5 lg:col-start-4 col-end-12">
-        {% block content %}
-        {% endblock content %}
-        {% block modal %}{% endblock modal %}
+          <li class="menu__item">
+            <a class="" href="{% url 'home:sales' %}"><i class="fas fa-ticket-alt text-3xl"></i><span
+                class="hidden md:inline-block">Venta</span></a>
+          </li>
+
+          <li class="menu__item">
+            {# URL provided by django-allauth/account/urls.py #}
+            <a class="nav-link" href="{% url 'account_logout' %}"><i class="fas fa-sign-out-alt text-3xl"></i> <span
+                class="hidden md:inline-block">Salir</span></a>
+          </li>
+        </ul>
       </div>
+    </nav>
+    <div class="col-start-4 md:col-start-5 lg:col-start-4 col-end-12">
+      {% block content %}
+      {% endblock content %}
+      {% block modal %}{% endblock modal %}
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
-    <script src="https://unpkg.com/axios@0.21.1/dist/axios.min.js"></script>
-    <script src="https://unpkg.com/vue-swal"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-    <script defer src="{% static 'js/project.js' %}"></script>
-    {% block inline_javascript %}
-    {% endblock inline_javascript %}
-  </body>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+  <script src="https://unpkg.com/axios@0.21.1/dist/axios.min.js"></script>
+  <script src="https://unpkg.com/vue-swal"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+  <script defer src="{% static 'js/project.js' %}"></script>
+  {% block inline_javascript %}
+  {% endblock inline_javascript %}
+</body>
+
 </html>

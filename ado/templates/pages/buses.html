@@ -24,7 +24,8 @@
           <td>${obj.description}</td>
           <td>${obj.driver.name}</td>
           <td class="text-center">
-            <span class="cursor-pointer" v-on:click="showModal('edit', obj.pk, obj.code, obj.description, obj.driver.pk)">Editar</span>
+            <span class="cursor-pointer"
+              v-on:click="showModal('edit', obj.pk, obj.code, obj.description, obj.driver.pk)">Editar</span>
             <span class="cursor-pointer" v-on:click="deleteData(obj.pk)">Eliminar</span>
           </td>
         </tr>
@@ -42,13 +43,15 @@
         <h2 class="text-xl">${modalTitle}</h2>
         <input type="text" name="driver-name" id="driver-name" v-model="newDataInput" placeholder="Código" required>
         <span v-show="errorCode" class="text-sm ml-1 mt-1 text-yellow-800">Este campo es requerido.</span>
-        <input type="text" name="description" id="description" v-model="newDataDescription" placeholder="Descripción" required>
+        <input type="text" name="description" id="description" v-model="newDataDescription" placeholder="Descripción"
+          required>
         <span v-show="errorDescription" class="text-sm ml-1 mt-1 text-yellow-800">Este campo es requerido.</span>
         <select id="driver" name="driver" v-model="driver" required>
           <option value="" disabled>Seleccione un conductor</option>
           <option v-for="driver in drivers" v-bind:value="driver.pk">${driver.name}</option>
         </select>
-        <span v-show="errorDriver" class="text-sm ml-1 mt-1 text-yellow-800">Este campo es requerido y no debe ser duplicado.</span>
+        <span v-show="errorDriver" class="text-sm ml-1 mt-1 text-yellow-800">Este campo es requerido y no debe ser
+          duplicado.</span>
         <div class="text-right mt-4">
           <button v-show="buttonAdd" v-on:click="addData">Agregar</button>
           <button v-show="buttonEdit" v-on:click="editData">Editar</button>

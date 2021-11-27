@@ -15,14 +15,14 @@
           <th>Accion</th>
         </tr>
       </thead>
-      <tbody >
+      <tbody>
         <tr v-for="passenger in passengers">
-            <td class="text-center">${passenger.pk}</td>
-            <td>${passenger.name}</td>
-            <td class="text-center">
-              <span class="cursor-pointer" v-on:click="showModal('edit', passenger.pk, passenger.name)">Editar</span>
-              <span class="cursor-pointer" v-on:click="deleteData(passenger.pk)">Eliminar</span>
-            </td>
+          <td class="text-center">${passenger.pk}</td>
+          <td>${passenger.name}</td>
+          <td class="text-center">
+            <span class="cursor-pointer" v-on:click="showModal('edit', passenger.pk, passenger.name)">Editar</span>
+            <span class="cursor-pointer" v-on:click="deleteData(passenger.pk)">Eliminar</span>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -36,7 +36,8 @@
       </div>
       <div class="modal__body">
         <h2 class="text-xl">${modalTitle}</h2>
-        <input type="text" name="passenger-name" id="passenger-name" v-model="newPassengerInput" placeholder="Nombres del pasajero">
+        <input type="text" name="passenger-name" id="passenger-name" v-model="newPassengerInput"
+          placeholder="Nombres del pasajero">
         <span v-show="error" class="text-sm ml-1 mt-1 text-yellow-800">Este campo es requerido.</span>
         <div class="text-right mt-4">
           <button v-show="buttonAdd" v-on:click="addPassenger">Agregar</button>

@@ -48,10 +48,10 @@
         return axios(config);
       },
       getRoutes: async function () {
-        let url = '/api/v1/routes/';
+        let url = '/api/v1/route/';
         let response = await this.getModuleData(url);
         console.log(response);
-        this.routes = response.data
+        this.routes = response.data.results;
       },
       getBuser: function () {},
       getDriver: function () {},

@@ -36,7 +36,8 @@
       </div>
       <div class="modal__body">
         <h2 class="text-xl">${modalTitle}</h2>
-        <input type="text" name="driver-name" id="driver-name" v-model="newDataInput" placeholder="Nombre del conductor">
+        <input type="text" name="driver-name" id="driver-name" v-model="newDataInput"
+          placeholder="Nombre del conductor">
         <span v-show="error" class="text-sm ml-1 mt-1 text-yellow-800">Este campo es requerido.</span>
         <div class="text-right mt-4">
           <button v-show="buttonAdd" v-on:click="addData">Agregar</button>
@@ -146,7 +147,7 @@
           this.objPk = ''
           this.modalTitle = "Agregar Conductor"
         }).catch(error => {
-           this.error = 'name' in error.response.data
+          this.error = 'name' in error.response.data
         })
       },
       deleteData: function (pk) {
