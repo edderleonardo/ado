@@ -15,6 +15,7 @@ from ado.utils.testing import (
     create_and_login_user,
     create_bus,
     create_driver,
+    create_fake_data_buses_routes,
     create_passenger,
 )
 
@@ -122,38 +123,8 @@ class PrivateRouteTest(TestCase):
         self.assertNotEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_avg_by_route(self):
-        """Test filter buses by route"""
-        bus = create_bus()
-        bus_2 = create_bus(code="34X2")
-
-        route = Route.objects.create(name="Route 1", schedule=datetime.datetime.now(tz=datetime.timezone.utc))
-        route.buses.add(bus)
-        route.buses.add(bus_2)
-        route.save()
-
-        other_bus = create_bus(code="OtherBus")
-        route_two = Route.objects.create(name="Route_2", schedule=datetime.datetime.now(tz=datetime.timezone.utc))
-        route_two.buses.add(other_bus)
-        route_two.save()
-
-        p1 = create_passenger()
-        p2 = create_passenger()
-        p3 = create_passenger()
-        p4 = create_passenger()
-        # add passengers
-        seat = Seat.objects.get(bus=bus, seat_number=1)
-        seat.passenger = p1
-        seat.save()
-        seat = Seat.objects.get(bus=bus, seat_number=2)
-        seat.passenger = p2
-        seat.save()
-        seat = Seat.objects.get(bus=bus, seat_number=3)
-        seat.passenger = p3
-        seat.save()
-        seat = Seat.objects.get(bus=bus, seat_number=4)
-        seat.passenger = p4
-        seat.save()
-        seat = Seat.objects.filter(bus=bus)
+        """Test avg passengers by route"""
+        create_fake_data_buses_routes()
 
         buses = Bus.objects.all()
         serializer = BusSerializer(buses, many=True).data
