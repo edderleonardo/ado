@@ -18,8 +18,6 @@ class BusesFilter(filters.FilterSet):
 
 
 class BusesViewSet(viewsets.ModelViewSet):
-    queryset = Bus.objects.all().order_by('pk').annotate(num_pass=Count('seats__passenger'))
+    queryset = Bus.objects.all().order_by('pk').annotate(num_pass=Count('seats__passenger') * 100 / 10)
     serializer_class = BusSerializer
     filterset_class = BusesFilter
-
-

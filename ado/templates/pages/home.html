@@ -1,4 +1,112 @@
 {% extends 'base.html' %}
 {% block content %}
-    <h1>Hello</h1>
+<div id="app">
+  <div class="mt-8 md:mt-10 flex justify-between items-center">
+    <h1 class="text-4xl">Dashboard</h1>
+  </div>
+
+  <div class="mt-9 dashboard-filters">
+    <h1 class="text-2xl">Filtrar buses por trayecto y por promedio de ocupación</h1> </br>
+    <span>Seleccione un criterio para filtrar datos 🔎</span>
+    <div class="dashboard-filters__elem mt-1">
+      <div class="dashboard-filters__elem__inputs">
+        <select id="route" name="route" v-model="routeID">
+          <option v-for="route in routes" v-bind:value="route.pk">${route.name}</option>
+        </select>
+        <input type="" v-model="percentage" placeholder="Introduzca un porcentaje: 00%">
+      </div>
+      <button v-on:click="applyFilter">Filtrar</button>
+    </div>
+    <div class="generic-table" v-if="busesFilter.length">
+      </br>
+      <table>
+        <thead>
+          <tr>
+            <th>Id</th>
+            <th>Código del bus</th>
+            <th>Descripción</th>
+            <th>Chofer</th>
+            <th>Porcentaje</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="bus in busesFilter">
+            <td class="text-center">${bus.pk}</td>
+            <td class="text-center">${bus.code}</td>
+            <td class="text-center">${bus.description}</td>
+            <td class="text-center">${bus.driver.name}</td>
+            <td class="text-center">${bus.avg_passenger}%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <br>
+    <span v-show="resultsFilter">No encontramos datos para ese criterio. 😞</span>
+  </div>
+
+  <div class="generic-table">
+    </br>
+    <h1 class="text-2xl">Promedio por rutas</h1> </br>
+    <table v-if="routes.length">
+      <thead>
+        <tr>
+          <th>Id</th>
+          <th>Nombre de Ruta</th>
+          <th>Promedio</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="route in routes">
+          <td class="text-center">${route.pk}</td>
+          <td class="text-center">${route.name}</td>
+          <td class="text-center">${route.avg_passengers}</td>
+        </tr>
+      </tbody>
+    </table>
+    <span v-else>Aún no tenemos datos para mostrar 😞</span>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block inline_javascript %}
+<script>
+  var app = new Vue({
+    el: "#app",
+    delimiters: ['${', '}'],
+    data: {
+      routes: [],
+      routeID: '',
+      percentage: '',
+      buses: [],
+      busesFilter: [],
+      resultsFilter: false
+    },
+    methods: {
+      getModuleData: async function (url) {
+        try {
+          return await axios.get(url);
+        } catch (e) {
+          console.log(e)
+        }
+      },
+      getRoutes: async function () {
+        let url = "/api/v1/route/";
+        let response = await this.getModuleData(url);
+        this.routes = response.data.results;
+      },
+      applyFilter: async function () {
+        let url = '/api/v1/buses/?route=' + this.routeID + '&num_pass=' + this.percentage;
+        console.log(url)
+        let response = await this.getModuleData(url);
+        this.resultsFilter = response.data.results.length > 0 ? false : true;
+        this.busesFilter = response.data.results
+      }
+    },
+    created() {
+      this.getRoutes();
+    }
+  });
+
+</script>
 {% endblock %}
