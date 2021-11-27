@@ -7,7 +7,6 @@ from faker import Faker
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from ado.apps.buses.api.serializers import BusSerializer
 from ado.apps.buses.models import Bus, Seat
 from ado.apps.routes.models import Route
 from ado.utils.testing import (
@@ -126,32 +125,4 @@ class PrivateBusesTest(TestCase):
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         self.assertNotEqual(res.status_code, status.HTTP_200_OK)
 
-    def test_avg_by_bus(self):
-        """Test bus avg"""
-        bus = create_bus()
-        route = Route.objects.create(name=fake.address(), schedule=datetime.datetime.now(tz=datetime.timezone.utc))
-        route.buses.add(bus)
-        route.save()
-
-        p1 = create_passenger()
-        p2 = create_passenger()
-        p3 = create_passenger()
-        p4 = create_passenger()
-        # add passengers
-        seat = Seat.objects.get(bus=bus, seat_number=1)
-        seat.passenger = p1
-        seat.save()
-        seat = Seat.objects.get(bus=bus, seat_number=2)
-        seat.passenger = p2
-        seat.save()
-        seat = Seat.objects.get(bus=bus, seat_number=3)
-        seat.passenger = p3
-        seat.save()
-        seat = Seat.objects.get(bus=bus, seat_number=4)
-        seat.passenger = p4
-        seat.save()
-        seat = Seat.objects.filter(bus=bus)
-
-        res = self.client.get(reverse('api:buses-detail', kwargs={'pk': bus.id}))
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(res.data['avg_passenger'], 40.0)
+    
