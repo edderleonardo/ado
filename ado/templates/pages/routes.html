@@ -43,11 +43,10 @@
         <h2 class="text-xl">${modalTitle}</h2>
         <input type="text" name="route-name" id="route-name" v-model="newDataInput" placeholder="Nombre de la Ruta">
         <span v-show="error" class="text-sm ml-1 mt-1 text-yellow-800">Este campo es requerido.</span>
-        <input type="text" name="schedule" id="schedule" v-model="dateTime" placeholder="">
+        <date-picker v-model="dateTime" lang="en" type="datetime" format="yyyy-MM-dd hh:mm:ss" style="width:100%"
+          confirm>
+        </date-picker>
         <span v-show="error" class="text-sm ml-1 mt-1 text-yellow-800">Este campo es requerido.</span>
-        <!-- <select name="buses" id="buses" >
-          <option v-for="bus in buses" v-bind:value="bus.pk">${bus.code}</option>
-        </select> -->
         <multiselect v-model.trim="busesData" tag-placeholder="Add this as new tag" placeholder="" selectLabel=""
           deselectLabel="" selectedLabel="Seleccionado" label="code" track-by="pk" :options="buses" :multiple="true"
           :taggable="true" @tag="addTag"></multiselect>
@@ -68,14 +67,15 @@
 <script>
   Vue.filter('formatDate', function (value) {
     if (value) {
-      return moment(String(value)).format('MM/DD/YYYY hh:mm')
+      return moment(String(value)).format('DD/MM/YYYY hh:mm')
     }
   })
   var app = new Vue({
     el: "#app",
     delimiters: ['${', '}'],
     components: {
-      Multiselect: window.VueMultiselect.default
+      Multiselect: window.VueMultiselect.default,
+      DatePicker: window.DatePicker.default
     },
     data: {
       allData: [],
