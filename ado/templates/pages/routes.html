@@ -24,7 +24,8 @@
           <td>${obj.schedule | formatDate }</td>
           <td class="text-center">${obj.num_buses}</td>
           <td class="text-center">
-            <span class="cursor-pointer" v-on:click="showModal('edit', obj.pk, obj.name, obj.schedule, obj.buses)">Editar</span>
+            <span class="cursor-pointer"
+              v-on:click="showModal('edit', obj.pk, obj.name, obj.schedule, obj.buses)">Editar</span>
             <span class="cursor-pointer" v-on:click="deleteData(obj.pk)">Eliminar</span>
           </td>
         </tr>
@@ -47,19 +48,9 @@
         <!-- <select name="buses" id="buses" >
           <option v-for="bus in buses" v-bind:value="bus.pk">${bus.code}</option>
         </select> -->
-        <multiselect
-              v-model.trim="busesData"
-              tag-placeholder="Add this as new tag"
-              placeholder=""
-              selectLabel=""
-              deselectLabel=""
-              selectedLabel="Seleccionado"
-              label="code"
-              track-by="pk"
-              :options="buses"
-              :multiple="true"
-              :taggable="true"
-              @tag="addTag"></multiselect>
+        <multiselect v-model.trim="busesData" tag-placeholder="Add this as new tag" placeholder="" selectLabel=""
+          deselectLabel="" selectedLabel="Seleccionado" label="code" track-by="pk" :options="buses" :multiple="true"
+          :taggable="true" @tag="addTag"></multiselect>
 
         <div class="text-right mt-4">
           <button v-show="buttonAdd" v-on:click="addData">Agregar</button>
@@ -75,7 +66,7 @@
 
 {% block inline_javascript %}
 <script>
-  Vue.filter('formatDate', function(value) {
+  Vue.filter('formatDate', function (value) {
     if (value) {
       return moment(String(value)).format('MM/DD/YYYY hh:mm')
     }
@@ -83,7 +74,9 @@
   var app = new Vue({
     el: "#app",
     delimiters: ['${', '}'],
-    components: { Multiselect: window.VueMultiselect.default },
+    components: {
+      Multiselect: window.VueMultiselect.default
+    },
     data: {
       allData: [],
       displayModal: false,
@@ -140,6 +133,7 @@
       showModal: function (mode, pk, name, schedule, buses) {
         this.newDataInput = '';
         this.displayModal = true;
+
         if (mode === 'edit') {
           this.modalTitle = "Editar Trayecto";
           this.buttonAdd = false;
@@ -147,7 +141,7 @@
           this.newDataInput = name;
           this.objPk = pk;
           this.dateTime = schedule
-          this.buses = busesData
+          this.busesData = buses
         }
       },
       hideModal: function () {
@@ -157,8 +151,8 @@
         this.buttonEdit = false;
         this.newDataInput = '';
         this.objPk = '';
-        this.dateTime = schedule
-        this.buses = busesData
+        this.dateTime = ''
+        this.busesData = []
         this.error = false;
       },
       addTag: function (newTag) {
