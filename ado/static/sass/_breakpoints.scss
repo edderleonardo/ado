@@ -1,3 +1,6 @@
+@import "colors";
+@import "general";
+
 $iPad: 768px;
 $web: 1024px;
 
@@ -60,4 +63,40 @@ $web: 1024px;
       }
     }
   }
+
+  .seats {
+    columns: 2 !important;
+    margin-top: 20px;
+
+    &__elem {
+      display: flex;
+      margin-bottom: 15px;
+      align-items: center;
+
+      &-seat {
+        display: flex;
+        justify-content: space-around;
+        width: 30%;
+
+        img {
+          height: 20px;
+        }
+      }
+
+      &-passenger {
+        width: 70%;
+
+        input {
+          @include input-style;
+          width: initial !important;
+        }
+
+        button {
+          @include button-style;
+          width: 45px !important;
+        }
+      }
+    }
+  }
+
 }

@@ -1,14 +1,36 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
 <div id="app">
   <div class="mt-8 md:mt-10 flex justify-between items-center">
     <h1 class="text-4xl">Venta de Tickets 🧾</h1>
   </div>
-  <div>
-    <select id="routes" name="routes" v-model="route">
-      <option value="">Select</option>
+  <div class="sales">
+    <select id="routes" name="routes" v-model="route" @change="changeRoute($event)">
+      <option value="">Rutas</option>
       <option v-for="route in routes" v-bind:value="route.pk">${route.name}</option>
     </select>
+
+    <select id="buses" name="buses" v-model="bus" @change="changeBus($event)">
+      <option value="">Buses</option>
+      <option v-for="bus in buses" v-bind:value="bus.pk">${bus.code}</option>
+    </select>
+
+    <div class="seats">
+      <div v-for="(seat, index) in busObj.seats" class="seats__elem">
+        <div class="seats__elem-seat">
+          <img src="{% static 'images/bus-seat-icon.png' %}" alt="">
+          <span>Asiento N. ${seat.seat_number}</span>
+        </div>
+        <div class="seats__elem-passenger">
+          <input type="text" :ref="'passenger-' + (index)" :value="seat.passenger.name"
+            :disabled="seat.passenger.name !== ''">
+          <button v-if="!seat.passenger.name" v-on:click="shopTicket(index, seat.pk, seat.seat_number)">
+            <i class="fas fa-shopping-cart"></i>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -22,7 +44,10 @@
     delimiters: ['${', '}'],
     data: {
       route: '',
-      routes: []
+      bus: '',
+      routes: [],
+      buses: [],
+      busObj: [],
     },
     methods: {
       getModuleData: async function (url) {
@@ -32,7 +57,7 @@
           console.log(e)
         }
       },
-      helperSendModuleInfo: function (method, url, payload) {
+      helperSendModuleInfo: async function (method, url, payload) {
         // + This function is to make all the POST or PUT requests
         const config = {
           method: method,
@@ -50,11 +75,37 @@
       getRoutes: async function () {
         let url = '/api/v1/route/';
         let response = await this.getModuleData(url);
-        console.log(response);
         this.routes = response.data.results;
       },
-      getBuser: function () {},
-      getDriver: function () {},
+      changeRoute: async function (e) {
+        buses = [];
+        bus = '';
+        this.busObj = [];
+        let url = '/api/v1/buses/?route=' + e.target.value;
+        let response = await this.getModuleData(url);
+        this.buses = response.data.results;
+      },
+      changeBus: async function (e) {
+        let url = '/api/v1/buses/' + e.target.value;
+        let response = await this.getModuleData(url);
+        console.log(response.data)
+        this.busObj = response.data;
+      },
+      shopTicket: async function (index, pk, seat) {
+        data_input = this.$refs['passenger-' + index][0].value;
+        payload = {
+          "pk": pk,
+          "seat_number": seat,
+          "user": data_input
+        }
+        let url = '/api/v1/add/passenger/' + pk + '/';
+        let response = await this.helperSendModuleInfo('PATCH', url, payload)
+        if (response.status === 200) {
+          let url = '/api/v1/buses/' + this.bus + '/';
+          let response = await this.getModuleData(url);
+          this.busObj = response.data;
+        }
+      },
     },
     created() {
       this.getRoutes()
