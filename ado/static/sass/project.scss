@@ -155,35 +155,45 @@
 }
 
 .seats {
-  columns: 2;
+  columns: 1;
   margin-top: 20px;
 
   &__elem {
-    display: flex;
-    margin-bottom: 15px;
+    //display: flex;
+    margin-bottom: 50px;
     align-items: center;
 
     &-seat {
       display: flex;
-      justify-content: space-around;
-      width: 30%;
+      //justify-content: space-around;
+      //width: 30%;
 
       img {
         height: 20px;
       }
+
+      span {
+        margin-left: 10px;
+      }
     }
 
     &-passenger {
-      width: 70%;
+      //width: 70%;
 
       input {
         @include input-style;
+        width: 100%;
       }
 
       button {
         @include button-style;
-        width: 45px !important;
+        width: 100%;
+        margin-top: 10px;
       }
     }
   }
+}
+
+.w100 {
+  width: 100% !important;
 }
