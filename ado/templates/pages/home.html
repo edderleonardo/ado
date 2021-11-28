@@ -97,7 +97,6 @@
       },
       applyFilter: async function () {
         let url = '/api/v1/buses/?route=' + this.routeID + '&num_pass=' + this.percentage;
-        console.log(url)
         let response = await this.getModuleData(url);
         this.resultsFilter = response.data.results.length > 0 ? false : true;
         this.busesFilter = response.data.results
